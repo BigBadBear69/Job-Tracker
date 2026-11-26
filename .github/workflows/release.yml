@@ -1,0 +1,50 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: ["**"]
+    paths-ignore: ["**.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Test & build release APK
+        run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+
+      - name: Read version
+        id: version
+        run: |
+          v=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "name=$v" >> "$GITHUB_OUTPUT"
+          cp app/build/outputs/apk/release/app-release.apk "JobClock-$v.apk"
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.name }}
+          name: Job Clock v${{ steps.version.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          files: JobClock-${{ steps.version.outputs.name }}.apk
+          fail_on_unmatched_files: true
+          body: |
+            Job Clock v${{ steps.version.outputs.name }}
+
+            **Install:** download `JobClock-${{ steps.version.outputs.name }}.apk` on your Android phone,
+            open it, and allow "Install unknown apps" for your browser/files app when asked.
+            Built from commit ${{ github.sha }}.
