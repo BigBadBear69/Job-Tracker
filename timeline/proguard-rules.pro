@@ -1,0 +1,4 @@
+-keep class org.maplibre.** { *; }
+-dontwarn org.maplibre.**
+-keep class com.google.gson.** { *; }
+-dontwarn com.google.gson.**

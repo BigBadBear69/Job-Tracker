@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- dotted route -->
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4" android:strokeLineCap="round"
+        android:pathData="M38,72 C48,62 44,52 56,48" />
+    <!-- start dot -->
+    <path android:fillColor="#FFFFFF" android:pathData="M38,72m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <!-- map pin -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M64,28c-8.3,0 -15,6.7 -15,15c0,11.2 15,25 15,25s15,-13.8 15,-25c0,-8.3 -6.7,-15 -15,-15zM64,48.5c-3,0 -5.5,-2.5 -5.5,-5.5s2.5,-5.5 5.5,-5.5s5.5,2.5 5.5,5.5s-2.5,5.5 -5.5,5.5z" />
+</vector>

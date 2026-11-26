@@ -1,4 +1,4 @@
-name: Build & Release APK
+name: Build & Release APKs
 
 on:
   push:
@@ -22,27 +22,46 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Test & build release APK
-        run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+      - name: Test & build release APKs
+        run: ./gradlew --no-daemon testReleaseUnitTest :app:assembleRelease :timeline:assembleRelease
 
-      - name: Read version
+      - name: Read versions
         id: version
         run: |
-          v=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
-          echo "name=$v" >> "$GITHUB_OUTPUT"
-          cp app/build/outputs/apk/release/app-release.apk "JobClock-$v.apk"
+          clock=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          timeline=$(grep -oP 'versionName = "\K[^"]+' timeline/build.gradle.kts)
+          echo "clock=$clock" >> "$GITHUB_OUTPUT"
+          echo "timeline=$timeline" >> "$GITHUB_OUTPUT"
+          cp app/build/outputs/apk/release/app-release.apk "JobClock-$clock.apk"
+          cp timeline/build/outputs/apk/release/timeline-release.apk "Timeline-$timeline.apk"
 
-      - name: Publish GitHub release
+      - name: Publish Job Clock release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.name }}
-          name: Job Clock v${{ steps.version.outputs.name }}
+          tag_name: v${{ steps.version.outputs.clock }}
+          name: Job Clock v${{ steps.version.outputs.clock }}
           target_commitish: ${{ github.sha }}
-          files: JobClock-${{ steps.version.outputs.name }}.apk
+          files: JobClock-${{ steps.version.outputs.clock }}.apk
           fail_on_unmatched_files: true
           body: |
-            Job Clock v${{ steps.version.outputs.name }}
+            Job Clock v${{ steps.version.outputs.clock }}
 
-            **Install:** download `JobClock-${{ steps.version.outputs.name }}.apk` on your Android phone,
+            **Install:** download `JobClock-${{ steps.version.outputs.clock }}.apk` on your Android phone,
             open it, and allow "Install unknown apps" for your browser/files app when asked.
-            Built from commit ${{ github.sha }}.
+
+      - name: Publish Timeline release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: timeline-v${{ steps.version.outputs.timeline }}
+          name: Timeline v${{ steps.version.outputs.timeline }}
+          target_commitish: ${{ github.sha }}
+          files: Timeline-${{ steps.version.outputs.timeline }}.apk
+          fail_on_unmatched_files: true
+          make_latest: true
+          body: |
+            Timeline v${{ steps.version.outputs.timeline }}: a private, on-device location timeline.
+
+            **Install:** download `Timeline-${{ steps.version.outputs.timeline }}.apk` on your Android phone,
+            open it, and allow "Install unknown apps" when asked. Requires Google Play Services.
+
+            On first launch, grant location **"Allow all the time"** so it can record in the background.
